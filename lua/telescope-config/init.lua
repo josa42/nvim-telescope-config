@@ -76,9 +76,17 @@ end
 
 function ts.in_workspace(fn)
   return function()
-    print(vim.inspect(fn))
     return fn(require('jg.telescope-workspaces').get_current_workspace_path())
   end
+end
+
+-- TODO extract into josa42/nvim-telescope-workspaces
+function ts.select_workspace()
+  local ws = require('jg.telescope-workspaces')
+
+  vim.ui.select(ws.get_workspaces(), { prompt = 'Workspace' }, function(w)
+    ws.set_current_workspace(w)
+  end)
 end
 
 function ts.find_files(path)
@@ -155,6 +163,8 @@ M.setup = function(opts)
     end
     return pickers
   end
+
+  local has_filebrowser, _ = pcall(require, 'telescope._extensions.file_browser')
 
   telescope.setup({
     pickers = picker_default_opts({
@@ -262,19 +272,9 @@ M.setup = function(opts)
   telescope.load_extension('fzf')
   telescope.load_extension('minimal_layout')
   telescope.load_extension('ui-select')
-  telescope.load_extension('file_browser')
 
-  -- TODO extract into josa42/nvim-telescope-workspaces
-  function ts.select_workspace()
-    local ws = require('jg.telescope-workspaces')
-
-    vim.ui.select(ws.get_workspaces(), { prompt = 'Workspace' }, function(w)
-      ws.set_current_workspace(w)
-    end)
-  end
-
-  function ts.find_string_in_buffer()
-    builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown({ previewer = false }))
+  if has_filebrowser then
+    telescope.load_extension('file_browser')
   end
 
   vim.api.nvim_create_user_command('Find', function(opts)
