@@ -97,6 +97,12 @@ function ts.in_workspace(fn)
   end
 end
 
+function ts.in_github_workflows(fn)
+  return ts.in_root(function(root)
+    fn(vim.fs.joinpath(root, '.github/workflows'))
+  end)
+end
+
 -- TODO extract into josa42/nvim-telescope-workspaces
 function ts.select_workspace()
   local ws = require('jg.telescope-workspaces')
@@ -326,6 +332,12 @@ M.commands = {
     find_files = ts.in_config(ts.find_files),
     find_string = ts.in_config(ts.find_string),
     file_browser = ts.in_config(ts.file_browser),
+  },
+
+  workflows = {
+    find_files = ts.in_github_workflows(ts.find_files),
+    find_string = ts.in_github_workflows(ts.find_string),
+    file_browser = ts.in_github_workflows(ts.file_browser),
   },
 }
 
