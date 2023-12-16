@@ -12,21 +12,38 @@ local ts = {}
 
 local function get_prompt_prefix(path)
   if path ~= nil and path ~= '.' then
-    return '[' .. path .. '] → '
+    return path .. ' → '
   end
   return '→ '
+end
+
+local function replacePrefix(path, prefix, replace)
+  if prefix ~= nil and string.sub(path, 1, prefix:len()) == prefix then
+    return replace .. string.sub(path, prefix:len() + 2)
+  end
+  return path
+end
+
+local function git_root()
+  local git_path = vim.fs.find('.git', { upward = true, limit = 1 })[1]
+  if git_path ~= nil then
+    return vim.fs.dirname(git_path)
+  end
 end
 
 local function set_path(path, opts)
   opts = opts or {}
   if path ~= nil and path ~= '.' then
-    if string.sub(path, 1, paths.home:len()) == paths.home then
-      path = '~' .. string.sub(path, paths.home:len() + 1)
+    local prefix = path
+    prefix = replacePrefix(prefix, vim.uv.cwd(), '')
+    if string.sub(prefix, 1, 1) == '/' then
+      prefix = replacePrefix(prefix, git_root(), ' ')
     end
+    prefix = replacePrefix(prefix, paths.home, '~/')
 
     return vim.tbl_extend('keep', {
       cwd = path,
-      prompt_prefix = get_prompt_prefix(path),
+      prompt_prefix = get_prompt_prefix(prefix),
     }, opts)
   end
 
