@@ -78,6 +78,7 @@ function ts.in_root(fn)
     local git_path = vim.fs.find('.git', { upward = true, limit = 1 })[1]
 
     if git_path ~= nil then
+      print(vim.fs.dirname(git_path))
       fn(vim.fs.dirname(git_path))
     else
       print('Could not find root')
@@ -112,12 +113,12 @@ function ts.select_workspace()
   end)
 end
 
-function ts.find_files(path)
+function M.find_files(path)
   local builtin = require('telescope.builtin')
   builtin.find_files(set_path(path, set_entry_maker(path)))
 end
 
-function ts.find_string(path)
+function M.find_string(path)
   local builtin = require('telescope.builtin')
   builtin.live_grep(set_path(path))
 end
@@ -301,42 +302,45 @@ M.setup = function(opts)
   end
 
   vim.api.nvim_create_user_command('Find', function(opts)
-    ts.find_files(opts.args)
+    M.find_files(opts.args)
   end, {
     nargs = 1,
     complete = 'file',
   })
 end
 
+M.find_files = M.find_files
+M.find_string = M.find_string
+
 M.commands = {
   global = {
-    find_files = ts.find_files,
-    find_string = ts.find_string,
+    find_files = M.find_files,
+    find_string = M.find_string,
     file_browser = ts.file_browser,
   },
 
   workspace = {
     select = ts.select_workspace,
-    find_files = ts.in_workspace(ts.find_files),
-    find_string = ts.in_workspace(ts.find_string),
+    find_files = ts.in_workspace(M.find_files),
+    find_string = ts.in_workspace(M.find_string),
     file_browser = ts.in_workspace(ts.file_browser),
   },
 
   root = {
-    find_files = ts.in_root(ts.find_files),
-    find_string = ts.in_root(ts.find_string),
+    find_files = ts.in_root(M.find_files),
+    find_string = ts.in_root(M.find_string),
     file_browser = ts.in_root(ts.file_browser),
   },
 
   config = {
-    find_files = ts.in_config(ts.find_files),
-    find_string = ts.in_config(ts.find_string),
+    find_files = ts.in_config(M.find_files),
+    find_string = ts.in_config(M.find_string),
     file_browser = ts.in_config(ts.file_browser),
   },
 
   workflows = {
-    find_files = ts.in_github_workflows(ts.find_files),
-    find_string = ts.in_github_workflows(ts.find_string),
+    find_files = ts.in_github_workflows(M.find_files),
+    find_string = ts.in_github_workflows(M.find_string),
     file_browser = ts.in_github_workflows(ts.file_browser),
   },
 }
