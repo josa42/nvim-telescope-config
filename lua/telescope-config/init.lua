@@ -138,6 +138,16 @@ M.setup = function(opts)
   local open = require('telescope-config.open').open
   local edit = require('telescope-config.open').edit
 
+  local function action_toggle_width(prompt_bufnr)
+    local current_picker = action_state.get_current_picker(prompt_bufnr)
+    if current_picker.layout_config.width == nil then
+      current_picker.layout_config.width = 0.9
+    else
+      current_picker.layout_config.width = nil
+    end
+    current_picker:full_layout_update()
+  end
+
   local function action_edit(prompt_bufnr, type)
     action_set.edit(prompt_bufnr, action_state.select_key_to_edit_key('default'))
   end
@@ -261,6 +271,7 @@ M.setup = function(opts)
           ['<C-a>'] = actions.add_selected_to_qflist + actions.open_qflist,
 
           ['<c-p>'] = action_layout.toggle_preview,
+          ['<c-w>'] = action_toggle_width,
         },
       },
       borderchars = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
