@@ -78,7 +78,6 @@ function ts.in_root(fn)
     local git_path = vim.fs.find('.git', { upward = true, limit = 1 })[1]
 
     if git_path ~= nil then
-      print(vim.fs.dirname(git_path))
       fn(vim.fs.dirname(git_path))
     else
       print('Could not find root')
